@@ -14,7 +14,7 @@ import time, threading
 
 COINGECKO = "https://api.coingecko.com/api/v3"
 COIN_ID = "ethereum"
-FASTAPI = "https://fastapiethereum.onrender.com"
+FASTAPI = "https://fastapiethereum-j6ou.onrender.com"
 
 
 # ----------------------------
