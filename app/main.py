@@ -23,10 +23,6 @@ st.set_page_config(page_title="AT3 — Crypto Forecast Portal", layout="wide")
 # --- BACKGROUND IMAGE (Loads from URL directly)
 # ============================================================
 def set_background():
-    """
-    Sets a background image directly from an online URL (no base64 encoding).
-    Maintains the same styling and contrast.
-    """
     image_url = "https://i.imgur.com/54zRvLM.png"
 
     st.markdown(
@@ -50,7 +46,6 @@ def set_background():
           background: none !important;
         }}
 
-        /* ✅ Background Layers */
         .stApp {{
             position: relative;
             background: none !important;
@@ -88,7 +83,6 @@ def set_background():
           height: 41vh;
         }}
 
-        /* ✅ Dark solid heading (no opacity) */
         .hero h1 {{
           font-size: 2.5rem;
           font-weight: 800;
@@ -97,7 +91,6 @@ def set_background():
           margin-bottom: 10px;
         }}
 
-        /* ✅ Dark solid subheading */
         .hero p {{
           color: #2a2a2a;
           font-size: 1.1rem;
@@ -139,7 +132,7 @@ def set_background():
         .hero small {{
           display: block;
           color: var(--gold-dark);
-          margin-top: 70px;
+          margin-top: 20px;
           font-weight: 700;
           letter-spacing: 1px;
           font-size: 1.2rem;
@@ -147,72 +140,96 @@ def set_background():
           text-shadow: 0 0 8px rgba(255,255,255,0.7);
         }}
 
-        /* TOKEN BAR */
+        /* ✅ TOKEN BAR FIXED FOR PERFECT ALIGNMENT */
         .token-bar {{
           background: rgba(17,17,17,0.92);
           display: flex;
           justify-content: center;
-          align-items: center;
+          align-items: stretch;
           gap: 20px;
-          height: 19vh;
+          min-height: 19vh;
           border-top: 1px solid #1c1c1c;
           border-bottom: 1px solid #1c1c1c;
-          padding: 2px 3%;
+          padding: 44px 3% 20px 3%;
         }}
 
         .token {{
           flex: 1 1 20%;
           text-align: center;
-          padding: 8px 6px;
+          padding: 12px 6px;
           border-radius: 10px;
           transition: all 0.3s ease;
           max-width: 280px;
           cursor: pointer;
           text-decoration: none;
+          display: flex;
+          flex-direction: column;
+          justify-content: flex-start;
+          align-items: center;
+          height: 100%;
+          min-height: 250px; /* consistent height */
         }}
 
         .token:hover {{
           background: rgba(212,175,55,0.08);
           box-shadow: 0 0 16px rgba(212,175,55,0.25);
+          transform: scale(1.03);
+        }}
+
+        .token-icon {{
+          width: 40px;
+          height: 40px;
+          margin-bottom: 10px;
         }}
 
         .token h3 {{
           color: var(--gold);
           font-size: 1rem;
-          margin-bottom: 3px;
+          margin-bottom: 8px;
+          height: 2.6em; /* fixed heading height */
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }}
 
         .token p {{
           color: var(--muted);
           font-size: 0.84rem;
-          line-height: 1.3;
+          line-height: 1.4;
           margin: 0;
+          flex-grow: 1;
+          display: flex;
+          align-items: flex-start;
+          justify-content: center;
+          text-align: center;
+          max-width: 90%;
         }}
 
         /* TEAM SECTION */
         .team {{
           background: rgba(10,10,10,0.92);
           text-align: center;
-          height: 30vh;
+          height: auto;
           display: flex;
           flex-direction: column;
           justify-content: center;
           border-top: 1px solid #1a1a1a;
           overflow: hidden;
-          padding: 5px 0;
+          padding: 20px 0;
         }}
 
         .team h3 {{
           color: var(--gold);
-          margin-bottom: 5px;
+          margin-bottom: 10px;
         }}
 
         .member-container {{
           display: flex;
           justify-content: center;
-          align-items: center;
+          align-items: stretch;
           gap: 20px;
           padding: 0 3%;
+          flex-wrap: wrap;
         }}
 
         .member {{
@@ -220,9 +237,17 @@ def set_background():
           text-align: center;
           padding: 3px;
           max-width: 250px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          min-height: 270px;
         }}
 
-        /* ✅ Updated Twinkle Image */
+        .member-img {{
+          flex-shrink: 0;
+        }}
+
         .member-img.twinkle {{
           width: 100px;
           height: 100px;
@@ -232,11 +257,29 @@ def set_background():
           margin: 0 auto 3px auto;
         }}
 
-        .member-img {{
+        .member-img.nidhi {{
           width: 100px;
           height: 100px;
           border-radius: 50%;
-          background: linear-gradient(145deg, #1a1a1a, #0d0d0d);
+          background: url('https://i.imgur.com/rB0cI6O.jpeg') center center / cover no-repeat;
+          border: 2px solid rgba(212,175,55,0.6);
+          margin: 0 auto 3px auto;
+        }}
+
+        .member-img.rohan {{
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          background: url('https://i.imgur.com/xDN1Aq8.jpeg') center center / cover no-repeat;
+          border: 2px solid rgba(212,175,55,0.6);
+          margin: 0 auto 3px auto;
+        }}
+
+        .member-img.paul {{
+          width: 100px;
+          height: 100px;
+          border-radius: 50%;
+          background: url('https://i.imgur.com/Qy5YpQP.jpeg') center center / cover no-repeat;
           border: 2px solid rgba(212,175,55,0.6);
           margin: 0 auto 3px auto;
         }}
@@ -283,7 +326,6 @@ set_background()
 if active_student:
     load_student_page(active_student)
 else:
-    # === LANDING PAGE ===
     st.markdown(
         """
         <div class="hero">
@@ -308,18 +350,22 @@ else:
         f"""
         <div class="token-bar">
           <a href="{base_url + urlencode({'student':'student_twinkle'})}" target="_self" class="token">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png" class="token-icon" alt="ETH">
             <h3>Ethereum (ETH)</h3>
             <p>Ethereum forecasting interface with streamlined data visualization and analysis tools.</p>
           </a>
           <a href="{base_url + urlencode({'student':'student_nidhi'})}" target="_self" class="token">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/5426.png" class="token-icon" alt="SOL">
             <h3>Solana (SOL)</h3>
             <p>Feature-rich forecasting dashboard highlighting Solana price dynamics and insights.</p>
           </a>
           <a href="{base_url + urlencode({'student':'student_rohan'})}" target="_self" class="token">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/52.png" class="token-icon" alt="XRP">
             <h3>XRP (XRP)</h3>
             <p>Interactive visual explorer for XRP market movements and performance tracking.</p>
           </a>
           <a href="{base_url + urlencode({'student':'student_paul'})}" target="_self" class="token">
+            <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1.png" class="token-icon" alt="BTC">
             <h3>Bitcoin (BTC)</h3>
             <p>Comprehensive Bitcoin data visualization with trend analysis and exploration tools.</p>
           </a>
@@ -328,7 +374,6 @@ else:
         unsafe_allow_html=True,
     )
 
-    # --- TEAM SECTION ---
     st.markdown(
         """
         <div class="team">
@@ -337,22 +382,22 @@ else:
             <div class="member">
               <div class="member-img twinkle"></div>
               <p><b>Twinkle</b></p>
-              <p>Developed Ethereum forecasting interface with streamlined visualization and FastAPI integration.</p>
+              <p>Designed the website. Built a FastAPI for Ethereum and Streamlit-based cryptocurrency forecasting app for real-time tokens next-day high price prediction, with interactive visuals, smooth navigation, and a shareable API for broader use.</p>
             </div>
             <div class="member">
-              <div class="member-img"></div>
+              <div class="member-img nidhi"></div>
               <p><b>Nidhi</b></p>
-              <p>Solana Integration and Visualization</p>
+              <p>Built a FastAPI for Solana and added the information for solana token to be used in forecasting app for real-time tokens next-day high price prediction.</p>
             </div>
             <div class="member">
-              <div class="member-img"></div>
+              <div class="member-img rohan"></div>
               <p><b>Rohan</b></p>
-              <p>XRP Deployment & Validation</p>
+              <p>Built a FastAPI for XRP and added the information for XRP token to be used in forecasting app for real-time tokens next-day high price prediction.</p>
             </div>
             <div class="member">
-              <div class="member-img"></div>
+              <div class="member-img paul"></div>
               <p><b>Paul</b></p>
-              <p>Bitcoin Model & API Setup</p>
+              <p>Built a FastAPI for Bitcoin and added the information for Bitcoin token to be used in forecasting app for real-time tokens next-day high price prediction.</p>
             </div>
           </div>
         </div>
