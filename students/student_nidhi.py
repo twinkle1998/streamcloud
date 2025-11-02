@@ -1,6 +1,5 @@
 ﻿# ============================================================
-# Nidhi — Solana (SOL) Forecasting Dashboard (with Candlestick)
-# Streamlit: FastAPI Prediction + Cached CoinGecko Data + Enhanced UI
+# Nidhi — Solana (SOL) Forecasting Dashboard 
 # ============================================================
 
 import streamlit as st
@@ -22,7 +21,7 @@ SOLANA_BLURB = (
 )
 
 # ----------------------------
-# Theme (consistent with group, improved colors)
+# Theme
 # ----------------------------
 def _inject_theme():
     st.markdown("""
@@ -158,7 +157,7 @@ def app():
     st.markdown("<div class='heading'>Solana (SOL) — Next-Day High Prediction</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub'>Powered by Coingecko API · FastAPI (Render) · AT3 Group 1</div>", unsafe_allow_html=True)
 
-    # === 1️⃣ Prediction + Snapshot ===
+    # === Prediction + Snapshot ===
     col_pred, col_info = st.columns([1.2, 1])
 
     with col_pred:
@@ -194,7 +193,7 @@ def app():
             st.info("CoinGecko snapshot unavailable.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # === 2️⃣ Coin Overview ===
+    # === Coin Overview ===
     with col_info:
         st.markdown("<div class='panel'>", unsafe_allow_html=True)
         st.subheader("Solana Overview")
@@ -211,7 +210,7 @@ def app():
             st.info("Metadata not available.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # === 3️⃣ Candlestick Chart ===
+    # === Candlestick Chart ===
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Recent Price Structure — Candlestick View")
     ohlc = get_ohlc()
@@ -221,7 +220,7 @@ def app():
         st.info("Candlestick data unavailable (API may be rate-limited).")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # === 4️⃣ Historical Trends ===
+    # === Historical Trends ===
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Market Overview & Historical Trends")
     mc = get_market_chart()
@@ -239,7 +238,7 @@ def app():
         st.warning("No market data available.")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # === 5️⃣ Insights ===
+    # === Insights ===
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Analytical Insights")
     st.markdown("""
@@ -252,8 +251,5 @@ def app():
     st.markdown("</div>", unsafe_allow_html=True)
 
 
-# ----------------------------
-# Run standalone
-# ----------------------------
 if __name__ == "__main__":
     app()
