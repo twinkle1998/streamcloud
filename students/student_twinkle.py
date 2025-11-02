@@ -204,6 +204,15 @@ def app():
     # Heading section with reduced spacing
     st.markdown("<h1 class='heading-yellow'>Ethereum Next-Day High Price Prediction</h1>", unsafe_allow_html=True)
     st.markdown("<p class='white-caption'>Powered by CoinGecko & FastAPI · AT3 Group 1, UTS 2025</p>", unsafe_allow_html=True)
+    st.markdown(
+        "<p style='color:#9ca3af; font-size:0.9rem; margin-top:-4px; margin-bottom:8px;'>"
+        "Note: The prediction module runs on <strong>Render.com (free tier)</strong>. "
+        "It may take <strong>50 seconds to 2 minutes</strong> to start if idle. "
+        "Please allow time."
+        "</p>",
+        unsafe_allow_html=True
+    )
+
     # reduced vertical spacing before iframe
     st.markdown("<div style='margin-top:-8px;'></div>", unsafe_allow_html=True)
 
