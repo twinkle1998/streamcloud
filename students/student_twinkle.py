@@ -1,6 +1,6 @@
 # ============================================================
 # Twinkle — Ethereum (ETH) Forecasting Dashboard
-# Snapshot resized + grey footer + future-ready layout
+# Compact spacing + better section transitions + refined layout
 # ============================================================
 
 import streamlit as st
@@ -12,9 +12,12 @@ import plotly.graph_objects as go
 from datetime import date
 import time, threading
 
+# ----------------------------
+# CONFIG
+# ----------------------------
 COINGECKO = "https://api.coingecko.com/api/v3"
 COIN_ID = "ethereum"
-FASTAPI = "https://fastapiethereum-j6ou.onrender.com"
+FASTAPI = "https://fastapiethereum-j6ou.onrender.com"  # <-- Render-hosted FastAPI backend
 
 
 # ----------------------------
@@ -40,7 +43,7 @@ def _inject_theme():
       color: var(--gold);
       font-size: 1.8rem;
       font-weight: 700;
-      margin-bottom: 4px; /* tighter spacing */
+      margin-bottom: 4px;
     }
 
     .white-caption {
@@ -48,7 +51,7 @@ def _inject_theme():
       opacity: 1 !important;
       font-weight: 500;
       margin-top: 0;
-      margin-bottom: 8px; /* reduced spacing */
+      margin-bottom: 8px;
     }
 
     .section-title-mustard {
@@ -108,6 +111,21 @@ def _inject_theme():
       color: #555 !important;
       font-weight: 500;
       font-size: 0.9rem;
+    }
+
+    /* Compact section spacing */
+    .block-container {
+      padding-top: 1rem !important;
+      padding-bottom: 1rem !important;
+    }
+    hr {
+      margin: 12px 0 !important;
+      border: 0;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    iframe {
+      display: block;
+      margin: 0 auto;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -201,11 +219,10 @@ def app():
     _inject_theme()
     threading.Thread(target=_warm_fastapi, daemon=True).start()
 
-    # Heading section with reduced spacing
     st.markdown("<h1 class='heading-yellow'>Ethereum Next-Day High Price Prediction</h1>", unsafe_allow_html=True)
     st.markdown("<p class='white-caption'>Powered by CoinGecko & FastAPI · AT3 Group 1, UTS 2025</p>", unsafe_allow_html=True)
     st.markdown(
-        "<p style='color:#9ca3af; font-size:0.9rem; margin-top:-4px; margin-bottom:8px;'>"
+        "<p style='color:#9ca3af; font-size:0.9rem; margin-top:-4px; margin-bottom:4px;'>"
         "Note: The prediction module runs on <strong>Render.com (free tier)</strong>. "
         "It may take <strong>50 seconds to 2 minutes</strong> to start if idle. "
         "Please allow time."
@@ -213,26 +230,66 @@ def app():
         unsafe_allow_html=True
     )
 
-    # reduced vertical spacing before iframe
-    st.markdown("<div style='margin-top:-8px;'></div>", unsafe_allow_html=True)
-
-    # Prediction iframe (top) — STATIC, NO SCROLL
+    # ==== Prediction IFRAME (Render FastAPI App) ====
     today = date.today()
-    st.markdown(
-        f"""
-        <div style='display: flex; justify-content: center; margin-bottom: 15px;'>
-            <iframe src="{FASTAPI}/predict/ethereum?date={today.isoformat()}"
-                    width="85%" height="600px"
-                    style="border:none; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.4);"
-                    scrolling="no">
-            </iframe>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-    st.markdown("---")
 
-    # 1️⃣ LIVE MARKET SNAPSHOT
+
+    st.markdown(
+    f"""
+    <div style='margin-top:-8px; margin-bottom:0; position:relative;'>
+      <iframe 
+        id="eth-frame"
+        src="https://fastapiethereum-j6ou.onrender.com/predict/ethereum?date={today.isoformat()}"
+        width="100%"
+        style="
+            border:none;
+            border-radius:10px;
+            box-shadow:0 2px 12px rgba(0,0,0,0.4);
+            min-height:1100px;
+            height:auto;
+            overflow:hidden;
+            margin-bottom:-4px;
+            transition: all 0.3s ease;
+        "
+        scrolling="no">
+      </iframe>
+      <script>
+        const iframe = document.getElementById('eth-frame');
+
+        // Resize dynamically
+        window.addEventListener('message', function(e) {{
+          if (e.data && e.data.type === 'resize-iframe') {{
+            iframe.style.height = e.data.height + 'px';
+          }}
+
+          // Toggle scroll and fixed height when "Raw Response" toggled
+          if (e.data && e.data.type === 'raw-response-toggle') {{
+            if (e.data.open) {{
+              // Raw Response is open → fix iframe height + enable scrolling
+              iframe.style.overflowY = 'auto';
+              iframe.setAttribute('scrolling', 'yes');
+              iframe.style.height = '850px'; // lock height for scroll
+            }} else {{
+              // Raw Response closed → expand to full content, remove scrollbar
+              iframe.style.overflow = 'hidden';
+              iframe.setAttribute('scrolling', 'no');
+              iframe.style.height = 'auto'; // reset to full open height
+            }}
+          }}
+        }});
+      </script>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
+
+
+    # Compact horizontal line after iframe
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # ==== LIVE MARKET SNAPSHOT ====
     col1, col2 = st.columns([1, 1])
     with col1:
         st.markdown("<div class='section-title-mustard'>Live Market Snapshot</div>", unsafe_allow_html=True)
@@ -251,9 +308,10 @@ def app():
             st.markdown(html, unsafe_allow_html=True)
         else:
             st.info("Data temporarily unavailable.")
-    st.markdown("---")
 
-    # 2️⃣ HISTORICAL PERFORMANCE + FUNDAMENTALS
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # ==== HISTORICAL PERFORMANCE + FUNDAMENTALS ====
     col3, col4 = st.columns(2)
     with col3:
         st.markdown("<div class='section-title-mustard'>Historical Market Performance</div>", unsafe_allow_html=True)
@@ -281,9 +339,10 @@ def app():
             st.markdown(f"[Website]({meta['links']['homepage'][0]}) | [Explorer]({meta['links']['blockchain_site'][0]})")
         else:
             st.info("Fundamentals unavailable.")
-    st.markdown("---")
 
-    # 3️⃣ SUMMARY
+    st.markdown("<hr>", unsafe_allow_html=True)
+
+    # ==== SUMMARY ====
     st.markdown("<div class='section-title-mustard'>Summary</div>", unsafe_allow_html=True)
     st.markdown("""
     This dashboard delivers:
