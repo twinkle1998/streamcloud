@@ -1,57 +1,64 @@
-project_name
-==============================
+## AT3 — Cryptocurrency Forecasting Portal (Streamlit App)
 
-A short description of the project.
+This project is part of the AT3 – Data Product with Machine Learning assessment.
+It provides an interactive web application for exploring and forecasting cryptocurrency prices using machine learning models and live market data.
 
-Project Organization
-------------
+### App Overview
 
-    ├── LICENSE
-    ├── Makefile           <- Makefile with commands like `make data` or `make train`
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    ├── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    └── tox.ini            <- tox file with settings for running tox; see tox.readthedocs.io
+1. The Streamlit app allows users to:
+2. Select and explore four cryptocurrencies — Ethereum, Bitcoin, Solana, and XRP.
+3. View real-time market data fetched from the CoinGecko API.
+4. Explore historical performance charts with interactive candlesticks.
+5. View machine learning–driven predictions (via FastAPI backend).
+6. Learn about the modeling process and data fundamentals behind each token.
+
+### Technologies Used
+```
+Streamlit — Web app frontend
+
+FastAPI — ML model API backend
+
+Python (scikit-learn, XGBoost) — Machine learning
+
+Plotly — Interactive charts
+
+CoinGecko API — Live market data
+```
+
+## Run Locally
+```
+Clone the repository and install dependencies:
+
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+pip install -r requirements.txt
 
 
---------
+### Then start the app:
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+streamlit run app/main.py
+
+
+#### Open in your browser:
+
+http://localhost:8501
+```
+
+## Live App (Streamlit Community Cloud)
+
+#### Access the deployed version here:
+👉https://streamcloud-qvsf8sk9awmcvudpvwodvg.streamlit.app/
+
+
+## 👩‍💻 Team Members
+```
+Name	Role
+Twinkle	Ethereum (ETH) Forecasting
+Nidhi	Solana (SOL) Forecasting
+Rohan	XRP (XRP) Forecasting
+Paul	Bitcoin (BTC) Forecasting
+```
+
+University of Technology Sydney — 2025
+
+AT3: Data Product with Machine Learning
