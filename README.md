@@ -34,12 +34,12 @@ cd <your-repo>
 pip install -r requirements.txt
 
 
-### Then start the app:
+#Then start the app:
 
 streamlit run app/main.py
 
 
-#### Open in your browser:
+#Open in your browser:
 
 http://localhost:8501
 ```
