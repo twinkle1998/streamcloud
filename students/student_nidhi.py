@@ -1,5 +1,5 @@
 ﻿# ============================================================
-# Nidhi — Solana (SOL) Forecasting Dashboard 
+# Nidhi — Solana (SOL) Forecasting Dashboard (Enhanced with warm-up & retry)
 # ============================================================
 
 import streamlit as st
@@ -8,7 +8,7 @@ import pandas as pd
 import plotly.graph_objects as go
 from datetime import date
 import time
-
+import threading
 
 COINGECKO = "https://api.coingecko.com/api/v3"
 FASTAPI = "https://predict-solana-api.onrender.com"
@@ -52,6 +52,27 @@ def _inject_theme():
 
 
 # ----------------------------
+# Helper — Warm-up & Retry
+# ----------------------------
+def warm_fastapi():
+    """Ping the FastAPI endpoint to wake up Render backend."""
+    try:
+        requests.get(f"{FASTAPI}/predict/solana", timeout=10)
+    except Exception:
+        pass
+
+
+def fetch_prediction_with_retry(retries=3, delay=5):
+    """Retry fetching prediction with backoff delay to handle Render cold starts."""
+    for attempt in range(retries):
+        pred = fetch_prediction()
+        if pred:
+            return pred
+        time.sleep(delay)
+    return None
+
+
+# ----------------------------
 # Cached Fetchers
 # ----------------------------
 @st.cache_data(ttl=900)
@@ -64,13 +85,11 @@ def fetch_prediction():
 
 @st.cache_data(ttl=1800)
 def get_model_info():
-    """Fetch model metadata from FastAPI backend"""
     try:
         r = requests.get(f"{FASTAPI}/model_info", timeout=15)
         return r.json() if r.status_code == 200 else None
     except Exception:
         return None
-
 
 @st.cache_data(ttl=1200)
 def fetch_coingecko(endpoint, params=None):
@@ -89,7 +108,6 @@ def get_market_chart(days=90):
 
 @st.cache_data(ttl=1800)
 def get_ohlc(days=30):
-    """Fetch OHLC data for candlestick chart"""
     return fetch_coingecko(f"coins/{COIN_ID}/ohlc", {"vs_currency": "usd", "days": days})
 
 @st.cache_data(ttl=1200)
@@ -105,6 +123,7 @@ def get_live_price():
 @st.cache_data(ttl=1800)
 def get_metadata():
     return fetch_coingecko(f"coins/{COIN_ID}")
+
 
 # ----------------------------
 # Chart Builders
@@ -132,7 +151,6 @@ def build_line_chart(series, label):
 
 
 def build_candlestick(ohlc_data):
-    """Builds a 30-day candlestick chart"""
     if not ohlc_data:
         return None
     df = pd.DataFrame(ohlc_data, columns=["time", "open", "high", "low", "close"])
@@ -160,6 +178,7 @@ def build_candlestick(ohlc_data):
     )
     return fig
 
+
 # ----------------------------
 # Main App
 # ----------------------------
@@ -169,13 +188,28 @@ def app():
     st.markdown("<div class='heading'>Solana (SOL) — Next-Day High Prediction</div>", unsafe_allow_html=True)
     st.markdown("<div class='sub'>Powered by Coingecko API · FastAPI (Render) · AT3 Group 1</div>", unsafe_allow_html=True)
 
+    # --- Warm-up background thread ---
+    threading.Thread(target=warm_fastapi, daemon=True).start()
+
+    # --- Informational note for users ---
+    st.markdown("""
+    <p style='color:#9ca3af; font-size:0.9rem; margin-top:-4px; margin-bottom:8px;'>
+    Note: The prediction API runs on <strong>Render (free tier)</strong>. 
+    If idle, it may take <strong>60-120 seconds</strong> to start. 
+    Please wait while it wakes up.
+    </p>
+    """, unsafe_allow_html=True)
+
     # === Prediction + Snapshot ===
     col_pred, col_info = st.columns([1.2, 1])
 
     with col_pred:
         st.markdown("<div class='panel'>", unsafe_allow_html=True)
         st.subheader("Prediction Dashboard")
-        pred = fetch_prediction()
+
+        with st.spinner("Fetching latest prediction... Please wait if backend is waking up."):
+            pred = fetch_prediction_with_retry()
+
         if pred:
             st.markdown("<div class='metric-label'>Predicted Next-Day HIGH (USD)</div>", unsafe_allow_html=True)
             st.markdown(f"<div class='metric-value'>${pred.get('Predicted Next-Day HIGH (USD)',0):,.2f}</div>", unsafe_allow_html=True)
@@ -184,10 +218,10 @@ def app():
                 unsafe_allow_html=True
             )
         else:
-            st.warning("Could not fetch prediction data from API.")
+            st.warning("Could not fetch prediction data from API (still waking up?).")
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # Live Market Snapshot (side panel style) + explanation
+        # --- Live Market Snapshot ---
         st.markdown("<div class='panel'>", unsafe_allow_html=True)
         st.subheader("Live Market Snapshot")
         live = get_live_price()
@@ -198,14 +232,14 @@ def app():
             st.markdown(f"**Market Cap:** ${d.get('usd_market_cap',0)/1e9:,.2f}B")
             st.markdown(f"**24h Volume:** ${d.get('usd_24h_vol',0)/1e9:,.2f}B")
             st.caption(
-                "➤ *Price* shows the latest USD value. *24h Change* tracks daily percentage movement. "
-                "*Market Cap* ≈ circulating supply × price, and *24h Volume* measures trading liquidity in the last day."
+                "➤ *Price* shows the latest USD value. *24h Change* tracks daily movement. "
+                "*Market Cap* ≈ circulating supply × price, and *24h Volume* measures liquidity."
             )
         else:
             st.info("CoinGecko snapshot unavailable.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # === Coin Overview ===
+    # --- Solana Overview ---
     with col_info:
         st.markdown("<div class='panel'>", unsafe_allow_html=True)
         st.subheader("Solana Overview")
@@ -220,8 +254,7 @@ def app():
             st.info("Metadata not available.")
         st.markdown("</div>", unsafe_allow_html=True)
 
-
-    # === Model Info Section ===
+    # --- Model Info ---
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Model Configuration & Training Info")
     info = get_model_info()
@@ -230,7 +263,6 @@ def app():
         st.markdown(f"**Trained Token:** {info.get('trained_token','N/A')}")
         st.markdown(f"**Training Period:** {info.get('training_period','N/A')}")
         st.markdown(f"**Feature Count:** {info.get('feature_count','N/A')}")
-
         with st.expander("View All Features Used", expanded=False):
             features = info.get("features_used", [])
             if features:
@@ -248,8 +280,7 @@ def app():
         st.info("Model information unavailable (FastAPI might be offline).")
     st.markdown("</div>", unsafe_allow_html=True)
 
-
-    # === Candlestick Chart ===
+    # --- Candlestick ---
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Recent Price Structure — Candlestick View")
     ohlc = get_ohlc()
@@ -259,7 +290,7 @@ def app():
         st.info("Candlestick data unavailable (API may be rate-limited).")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # === Historical Trends ===
+    # --- Historical Trends ---
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Market Overview & Historical Trends")
     mc = get_market_chart()
@@ -277,14 +308,14 @@ def app():
         st.warning("No market data available.")
     st.markdown("</div>", unsafe_allow_html=True)
 
-    # === Insights ===
+    # --- Insights ---
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
     st.subheader("Analytical Insights")
     st.markdown("""
-    - **Prediction Model:** Linear Regression forecasting Solana’s next-day high based on engineered OHLCV features.  
-    - **Candlestick View:** Highlights intraday market volatility and trend reversals for short-term traders.  
-    - **Market Summary:** Live 24-hour metrics retrieved from CoinGecko, cached to prevent rate-limit issues.  
-    - **Technical Edge:** Integrated FastAPI backend ensures reliable and low-latency inference.  
+    - **Prediction Model:** Linear Regression forecasting Solana’s next-day high using engineered OHLCV features.  
+    - **Candlestick View:** Visualizes short-term volatility and market structure.  
+    - **Market Summary:** 24-hour metrics from CoinGecko, cached to avoid rate limits.  
+    - **Technical Edge:** FastAPI backend ensures low-latency, reliable inference.  
     """)
     st.markdown("<p class='note'>Dashboard developed by Nidhi Upadhyay · AT3 Group 1 · University of Technology Sydney (2025)</p>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
