@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from datetime import date
 import time
 
+
 COINGECKO = "https://api.coingecko.com/api/v3"
 FASTAPI = "https://predict-solana-api.onrender.com"
 COIN_ID = "solana"
@@ -49,6 +50,7 @@ def _inject_theme():
     </style>
     """, unsafe_allow_html=True)
 
+
 # ----------------------------
 # Cached Fetchers
 # ----------------------------
@@ -59,6 +61,16 @@ def fetch_prediction():
         return r.json() if r.status_code == 200 else None
     except Exception:
         return None
+
+@st.cache_data(ttl=1800)
+def get_model_info():
+    """Fetch model metadata from FastAPI backend"""
+    try:
+        r = requests.get(f"{FASTAPI}/model_info", timeout=15)
+        return r.json() if r.status_code == 200 else None
+    except Exception:
+        return None
+
 
 @st.cache_data(ttl=1200)
 def fetch_coingecko(endpoint, params=None):
@@ -202,13 +214,40 @@ def app():
             img = meta['image']['large']
             st.image(img, width=100)
             st.markdown(f"**Symbol:** {meta['symbol'].upper()}  \n**Name:** {meta['name']}")
-            st.markdown("**Algorithm (ML):** Linear Regression (next-day HIGH forecasting)")
-            st.markdown("**Consensus / Tech:** Proof of Stake + Proof of History")
             st.markdown(f"[Official Website]({meta['links']['homepage'][0]})  |  [Explorer]({meta['links']['blockchain_site'][0]})")
             st.markdown(f"<div class='coin-info'>{SOLANA_BLURB}</div>", unsafe_allow_html=True)
         else:
             st.info("Metadata not available.")
         st.markdown("</div>", unsafe_allow_html=True)
+
+
+    # === Model Info Section ===
+    st.markdown("<div class='panel'>", unsafe_allow_html=True)
+    st.subheader("Model Configuration & Training Info")
+    info = get_model_info()
+    if info:
+        st.markdown(f"**Algorithm Used:** {info.get('algorithm','N/A')}")
+        st.markdown(f"**Trained Token:** {info.get('trained_token','N/A')}")
+        st.markdown(f"**Training Period:** {info.get('training_period','N/A')}")
+        st.markdown(f"**Feature Count:** {info.get('feature_count','N/A')}")
+
+        with st.expander("View All Features Used", expanded=False):
+            features = info.get("features_used", [])
+            if features:
+                cols = st.columns(2)
+                half = len(features)//2
+                with cols[0]:
+                    for f in features[:half]:
+                        st.markdown(f"- {f}")
+                with cols[1]:
+                    for f in features[half:]:
+                        st.markdown(f"- {f}")
+            else:
+                st.write("No feature list available.")
+    else:
+        st.info("Model information unavailable (FastAPI might be offline).")
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
     # === Candlestick Chart ===
     st.markdown("<div class='panel'>", unsafe_allow_html=True)
